@@ -35,21 +35,28 @@
 
 
 # Google embeddings API since its lightweigh (for resp api)
-import numpy as np
 from google import genai
+import numpy as np
 
 
 def generate_embeddings(texts: list[str], api_key: str) -> np.ndarray:
-    """Generates 768-dimensional dense embeddings via Google GenAI API with zero local RAM usage."""
-    if not texts:
-        return np.array([])
+  """Generates dense embeddings via Google GenAI API with zero local RAM usage."""
+  if not texts:
+    return np.array([])
 
-    client = genai.Client(api_key=api_key.strip())
+  client = genai.Client(api_key=api_key.strip())
+
+  vectors = []
+  # Process embeddings via the client embedding endpoint
+  for text in texts:
     response = client.models.embed_content(
         model="text-embedding-004",
-        contents=texts,
+        contents=text,
     )
+    # Extract the embedding values vector
+    if hasattr(response, "embedding") and response.embedding:
+      vectors.append(response.embedding.values)
+    elif hasattr(response, "embeddings") and response.embeddings:
+      vectors.append(response.embeddings[0].values)
 
-    # Convert embedding values to NumPy float array
-    vectors = [item.values for item in response.embeddings]
-    return np.array(vectors, dtype=np.float32)
+  return np.array(vectors, dtype=np.float32)
