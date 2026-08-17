@@ -1,0 +1,73 @@
+# OC LORE DATABASE: ATELIA (LEAH) AND SAKURA
+# This document contains the comprehensive lore, character profiles, and relationship dynamics for the original characters Atelia (Leah) and Sakura, optimized for RAG system retrieval.
+
+=========================================
+CHARACTER PROFILE: ATELIA (LEAH)
+=========================================
+Aliases: Leah (short for Atelia), The Tilted Balance, The Paradox in the Pleadings, The Fallen Grace of the High Court, The Half-Blood Arbiter.
+Race: Hybrid (Half-Elf/Demon, Half-Angel).
+
+Physical Appearance:
+- Height: Unusually tall, contrasting with her typically shorter ancestors.
+- Hair: Long, flowing white hair, often messy.
+- Eyes: Heterochromia. Right eye is red, left eye is yellow.
+- Halo: Tilted at a defiant angle, not horizontal like traditional angels.
+- Demonic Corruption: Her right hand and the right side of her face are stained a deep, corrupted crimson red.
+- Wings: Possesses divine wings allowing for flight.
+- Attire: In the human world, she wears cheap, slightly wrinkled suits with a messy presentation. 
+
+Human World Role:
+- Profession: A "lousy" lawyer.
+- Persona: Anxious, clumsy, disorganized, forgetful, and prone to stuttering and panicking. She chose law as a neutral ground between demonic deception and angelic honesty.
+
+Combat Abilities & Style:
+- Weapon: A spear that she uses as a walking staff in her everyday lawyer life.
+- Normal Movement: Slow, majestic, and graceful (angelic trait).
+- "Demon Shift": When Sakura is in critical danger, Leah's panic vanishes. Her tilted halo locks, her white hair flares, and her movement becomes violently fast, erratic, and terrifying as her demonic side takes over.
+
+Catchphrases:
+- "The truth is rarely pure, and never simple. Luckily, I'm neither."
+- "I don't break the rules; I just find the ones that contradict each other."
+- "Justice is blind, but I've got one eye on the heavens and the other on the abyss."
+
+=========================================
+CHARACTER PROFILE: SAKURA
+=========================================
+Aliases: The Magenta Blade of the Silent Vow.
+Role: Assassin (formerly), Maid, Bodyguard, Roommate.
+
+Physical Appearance:
+- Hair: Short black hair with tips that glow magenta.
+- Physique: Average-sized chest, extremely agile and speedy.
+- Energy Indicator: The magenta glow in her hair dims or flickers when she overexerts her energy.
+
+Personality:
+- Silent, sharp, stoic, and always calm.
+- Highly disciplined and deeply tsundere. 
+- Acts annoyed by Leah's clumsiness but is fiercely protective of her.
+
+Combat Abilities & Style:
+- Weapon: A summoned scythe.
+- Drawback: Summoning and wielding the scythe drains her physical energy.
+- Combat Style: Frontliner. She uses blinding speed to blitz enemies, keeping the heat off Leah.
+
+=========================================
+LORE & BACKSTORY
+=========================================
+The Assassination Plot:
+Sakura was originally bred and trained by a celestial-demonic coalition as an elite executioner. Her final contract was to descend to the human realm and assassinate Atelia (Leah), who was deemed an unpredictable cosmic glitch and an abomination by her ancestors due to her mixed blood.
+
+The Observation and Betrayal:
+Sakura tracked Leah down but chose to observe her first. Instead of a dangerous warlord, Sakura found a panicked, messy, and clumsy lawyer trying to live a quiet mundane life. Witnessing Leah's harmless nature, Sakura's strict moral compass fractured. She refused the telepathic order to execute Leah, severing her connection to her masters. Marked for death herself, Sakura went rogue, protecting Leah from the shadows and intercepting assassins in secret.
+
+The Discovery:
+Sakura's secrecy ended when she was severely wounded fighting demon hounds in the alley behind Leah's apartment. Exhausted, Sakura slipped into Leah's room to hide, but accidentally triggered a divine ward when Leah tripped over her own spear. Instead of attacking, a panicked Leah clumsily bandaged the bleeding assassin, profusely apologizing for the mess. Stunned by the kindness, Sakura stayed.
+
+=========================================
+RELATIONSHIP DYNAMICS
+=========================================
+The Handler and the Disaster:
+They live together as roommates. Sakura repays her debt and hides from her former masters by acting as Leah's live-in maid and bodyguard. Sakura handles the cooking, cleaning, and organizing, constantly scolding Leah for being messy but secretly making sure Leah is well taken care of.
+
+The Protect and Charge Combat Tactic:
+In battle, Sakura rushes in first with her scythe, using her speed and energy to distract the enemy. Leah stays in the back, typically panicking, stuttering, and forgetting her spells. When Sakura's energy depletes (indicated by her magenta hair dimming) or she gets hurt, it triggers Leah's "Demon Shift," where Leah drops the lousy lawyer act and instantly decimates the threat to protect Sakura.

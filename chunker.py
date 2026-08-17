@@ -1,16 +1,34 @@
-def chunk_text(text: str, chunk_size: int = 50, overlap: int = 10) -> list[str]:
-    word = text.split()
-    chunks = []
-    # calculate stride which is basically chunk size - overlap
-    stride = chunk_size - overlap
-    for i  in range(0, len(word), stride):
-        chunk = word[i:i + chunk_size]
-        # by using .join, it combines all the word in chunk, with space between them, so its like a sentence rather than a list of words
-        # and append just adds that sentence to the chunks list
-        chunks.append(" ".join(chunk))
-    return chunks
+def chunk_text(
+    text: str,
+    source: str = "unknown",
+    page: int = 1,
+    chunk_size: int = 40,
+    overlap: int = 8,
+) -> list[dict]:
+    """Splits text into chunks and returns a list of dictionaries with metadata."""
+    words = text.split()
+    if not words:
+        return []
 
-if __name__ == "__main__":
-    sample_text = "This is a sample text that we will use to demonstrate how the chunking function works. It will split this text into smaller chunks based on the specified chunk size and overlap."
-    chunked_text = chunk_text(sample_text, chunk_size=10, overlap=2)
-    print(chunked_text)
+    if overlap >= chunk_size:
+        raise ValueError("Overlap must be strictly smaller than chunk_size")
+
+    stride = chunk_size - overlap
+    chunks = []
+    chunk_id = 0
+
+    for i in range(0, len(words), stride):
+        chunk_words = words[i : i + chunk_size]
+        chunk_text_str = " ".join(chunk_words)
+
+        chunks.append(
+            {
+                "text": chunk_text_str,
+                "source": source,
+                "page": page,
+                "chunk_id": chunk_id,
+            }
+        )
+        chunk_id += 1
+
+    return chunks
