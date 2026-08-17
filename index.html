@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Engine — Minimalist Document Intelligence</title>
+    
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-main: #0a0c10;
+            --bg-card: rgba(18, 22, 31, 0.85);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent-glow: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #bc8cff;
+            --accent-warning: #f85149;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient Glow Mesh */
+        .ambient-glow {
+            position: fixed;
+            top: -25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 850px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(88, 166, 255, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Frosted Navbar */
+        nav {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 900px;
+            padding: 10px 24px;
+            background: rgba(13, 17, 23, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 9999px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .brand {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 18px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 110px 20px 60px 20px;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 40px 0 30px 0;
+        }
+
+        .pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(88, 166, 255, 0.08);
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            padding: 5px 14px;
+            border-radius: 9999px;
+            font-size: 12px;
+            color: var(--accent-glow);
+            font-family: var(--font-mono);
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 6vw, 56px);
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            background: linear-gradient(180deg, #ffffff 40%, #8b949e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 14px;
+        }
+
+        .hero p {
+            font-size: clamp(14px, 2vw, 17px);
+            color: var(--text-secondary);
+            max-width: 580px;
+            margin: 0 auto 30px auto;
+            font-weight: 300;
+        }
+
+        /* Card Container */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(12px);
+            margin-bottom: 30px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .card-header p {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        /* Inputs & Controls */
+        .input-control {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-control:focus {
+            border-color: var(--accent-glow);
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-main);
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--border-hover);
+        }
+
+        .btn-primary {
+            background: rgba(88, 166, 255, 0.15);
+            border-color: rgba(88, 166, 255, 0.35);
+            color: var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            background: rgba(88, 166, 255, 0.25);
+        }
+
+        /* Chat Log Window */
+        .chat-window {
+            background: #0d1117;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            height: 380px;
+            overflow-y: auto;
+            padding: 18px;
+            text-align: left;
+            font-size: 14px;
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: rgba(88, 166, 255, 0.12);
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 12px 12px 2px 12px;
+            max-width: 80%;
+            font-size: 13px;
+        }
+
+        .msg-assistant {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 14px 18px;
+            border-radius: 12px 12px 12px 2px;
+            max-width: 90%;
+            font-size: 13px;
+        }
+
+        .citation-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 2px solid var(--accent-purple);
+            padding: 8px 12px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+        }
+
+        /* GitHub Profile Card Component */
+        .profile-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 40px 0 20px 0;
+            backdrop-filter: blur(12px);
+        }
+
+        .profile-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+        }
+
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid var(--border-subtle);
+            object-fit: cover;
+            background: #111;
+        }
+
+        .profile-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .profile-handle {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent-glow);
+        }
+
+        .profile-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .profile-links a {
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            text-decoration: none;
+            border: 1px solid var(--border-subtle);
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .profile-links a:hover {
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        footer a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .profile-card { flex-direction: column; align-items: flex-start; }
+            .chat-window { height: 320px; }
+            nav { width: calc(100% - 24px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Mesh Glow -->
+    <div class="ambient-glow"></div>
+
+    <!-- Floating Navigation Bar -->
+    <nav>
+        <a href="https://itsraviitech.github.io/nothingness/" class="brand">← NOTHINGNESS</a>
+        <ul class="nav-links">
+            <li><a href="#app">Engine</a></li>
+            <li><a href="https://github.com/itsraviitech/rag-from-scratch" target="_blank">Repository ↗</a></li>
+        </ul>
+    </nav>
+
+    <div class="wrapper">
+        
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="pill-badge">
+                <span>●</span> Vector Retrieval Engine v1.0
+            </div>
+            <h1>RAG Document Intelligence</h1>
+            <p>Upload private PDFs or text files to compute vector embeddings and perform cited retrieval via REST API.</p>
+        </section>
+
+        <!-- Main RAG Application Interface -->
+        <section id="app" class="card">
+            
+            <!-- Step 1: Configuration & File Upload -->
+            <div class="card-header">
+                <h2>1. Ingestion & Secrets</h2>
+                <p>Provide your Gemini API key and select a document to index.</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                <input type="password" id="geminiKeyInput" class="input-control" style="flex: 2; min-width: 220px;" placeholder="Gemini API Key (AIzaSy...)" />
+                <input type="file" id="fileUploadInput" accept=".pdf,.txt" style="display: none;" />
+                <button class="btn" onclick="document.getElementById('fileUploadInput').click()">📁 Select Document</button>
+                <button class="btn btn-primary" id="uploadBtn">Upload & Embed</button>
+            </div>
+            
+            <div id="uploadStatus" style="font-size: 12px; color: var(--text-secondary); font-family: var(--font-mono); margin-bottom: 24px;">
+                Status: Ready for document ingestion
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin-bottom: 24px;" />
+
+            <!-- Step 2: Interactive Chat Log -->
+            <div class="card-header">
+                <h2>2. Grounded Q&A Assistant</h2>
+                <p>Vector search finds relevant chunks; LLM generates answers with source provenance.</p>
+            </div>
+
+            <div class="chat-window" id="chatBox">
+                <div class="msg-assistant">
+                    Welcome! Upload a document above to get started. Answers will cite specific source files and page numbers.
+                </div>
+            </div>
+
+            <!-- Step 3: Query Input -->
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="userQueryInput" class="input-control" placeholder="Ask a question about the document..." />
+                <button class="btn btn-primary" id="sendQueryBtn">Send</button>
+            </div>
+
+        </section>
+
+        <!-- Dynamic GitHub Profile Card -->
+        <div class="profile-card" id="developerCard">
+            <div class="profile-left">
+                <img id="ghAvatar" class="profile-avatar" src="https://github.com/itsraviitech.png" alt="Avatar" />
+                <div>
+                    <div class="profile-name" id="ghName">itsraviitech</div>
+                    <div class="profile-handle">@itsraviitech</div>
+                </div>
+            </div>
+            <div class="profile-links">
+                <a href="https://github.com/itsraviitech" target="_blank">GitHub Profile ↗</a>
+                <a href="https://github.com/itsraviitech/rag-from-scratch" target="_blank">RAG Repo ↗</a>
+                <a href="https://itsraviitech.github.io/nothingness/" target="_blank">Nothingness ↗</a>
+            </div>
+        </div>
+
+        <!-- Minimal Footer -->
+        <footer>
+            <div>&copy; 2026 itsRaviTech. Built from scratch with Python, NumPy & FastAPI.</div>
+            <div>
+                <a href="mailto:ravibahalu@gmail.com">Contact Developer</a>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Frontend RAG Logic & API Client -->
+    <script>
+        // Update this URL to your deployed Render/HuggingFace backend, or localhost:8000 for local testing
+        const API_BASE_URL = "http://localhost:8000"; 
+
+        // 1. Fetch GitHub Profile Info Dynamically
+        async function loadGithubProfile() {
+            try {
+                const res = await fetch("https://api.github.com/users/itsraviitech");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.name) document.getElementById("ghName").innerText = data.name;
+                    if (data.avatar_url) document.getElementById("ghAvatar").src = data.avatar_url;
+                }
+            } catch (e) {
+                // Fallback gracefully to default values
+            }
+        }
+        loadGithubProfile();
+
+        // 2. Upload Document via REST API
+        document.getElementById("uploadBtn").addEventListener("click", async () => {
+            const fileInput = document.getElementById("fileUploadInput");
+            const statusDiv = document.getElementById("uploadStatus");
+
+            if (!fileInput.files[0]) {
+                alert("Please select a .pdf or .txt file first.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            statusDiv.innerText = "Processing document and generating vector embeddings...";
+            statusDiv.style.color = "var(--accent-glow)";
+            
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    statusDiv.innerText = `✅ ${data.message} (${data.total_indexed_chunks} total chunks indexed)`;
+                    statusDiv.style.color = "var(--accent-green)";
+                } else {
+                    statusDiv.innerText = `❌ Error: ${data.detail}`;
+                    statusDiv.style.color = "var(--accent-warning)";
+                }
+            } catch (err) {
+                statusDiv.innerText = `❌ Connection Error: Ensure backend is running at ${API_BASE_URL}`;
+                statusDiv.style.color = "var(--accent-warning)";
+            }
+        });
+
+        // 3. Query RAG REST API
+        document.getElementById("sendQueryBtn").addEventListener("click", sendQuery);
+        document.getElementById("userQueryInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") sendQuery();
+        });
+
+        async function sendQuery() {
+            const queryInput = document.getElementById("userQueryInput");
+            const keyInput = document.getElementById("geminiKeyInput");
+            const chatBox = document.getElementById("chatBox");
+            const query = queryInput.value.trim();
+            const apiKey = keyInput.value.trim();
+
+            if (!query) return;
+            if (!apiKey) {
+                alert("Please enter your Gemini API Key in the configuration section.");
+                return;
+            }
+
+            // Append User Message
+            chatBox.innerHTML += `<div class="msg-user">${query}</div>`;
+            queryInput.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const thinkingId = "thinking-" + Date.now();
+            chatBox.innerHTML += `<div id="${thinkingId}" class="msg-assistant" style="color: var(--text-secondary);">Searching vector embeddings & generating answer...</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/query`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Gemini-Key": apiKey
+                    },
+                    body: JSON.stringify({ query: query, top_k: 3 })
+                });
+
+                const data = await res.json();
+                document.getElementById(thinkingId)?.remove();
+
+                if (res.ok) {
+                    let sourcesHtml = data.sources.map(s => 
+                        `<div style="margin-top: 4px;">• <b>${s.source}</b> (Page ${s.page}) — <i>"${s.text.substring(0, 80)}..."</i></div>`
+                    ).join("");
+
+                    chatBox.innerHTML += `
+                        <div class="msg-assistant">
+                            ${data.answer}
+                            <div class="citation-box">
+                                <div style="color: var(--accent-purple); font-weight: bold; margin-bottom: 2px;">CITED SOURCES:</div>
+                                ${sourcesHtml}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    chatBox.innerHTML += `<div class="msg-assistant" style="color: var(--accent-warning);"><b>Error:</b> ${data.detail}</div>`;
+                }
+            } catch (err) {
+                document.getElementById(thinkingId)?.remove();
+                chatBox.innerHTML += `<div class="msg-assistant" style="color: var(--accent-warning);"><b>Error:</b> Could not reach backend API at ${API_BASE_URL}</div>`;
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
