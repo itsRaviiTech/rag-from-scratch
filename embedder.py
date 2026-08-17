@@ -10,6 +10,8 @@ def generate_embeddings(chunks: list[str]):
     embeddings = model.encode(chunks)
     return embeddings
 
+
+# testing the embedding generation with a sample text muahahaha 
 if __name__ == "__main__":
     sample_text = (
         "Retrieval-Augmented Generation (RAG) is a technique that enhances Large Language Models "
