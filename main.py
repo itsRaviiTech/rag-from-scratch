@@ -117,14 +117,18 @@ async def query_rag(req: QueryRequest, x_gemini_key: str = Header(None)):
     )
 
   try:
-    # 1. Embed query via Gemini Embedding API
+    # 1. Embed query vector using the same embedder
     query_vector = generate_embeddings(
         [req.query], api_key=x_gemini_key.strip()
     )[0]
 
     # 2. In-memory Cosine Similarity
     def cosine_sim(a, b):
-      return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+      norm_a = np.linalg.norm(a)
+      norm_b = np.linalg.norm(b)
+      if norm_a == 0 or norm_b == 0:
+        return 0.0
+      return float(np.dot(a, b) / (norm_a * norm_b))
 
     scored_chunks = []
     for i, emb in enumerate(VECTOR_STORE["embeddings"]):
@@ -139,7 +143,7 @@ async def query_rag(req: QueryRequest, x_gemini_key: str = Header(None)):
       c_copy["score"] = round(score, 4)
       top_chunks.append(c_copy)
 
-    # 3. Context string with provenance
+    # 3. Format Context String with Source Provenance
     context_str = "\n---\n".join([
         f"Source: {c['source']} (Page {c['page']})\nContent: {c['text']}"
         for c in top_chunks
@@ -154,13 +158,14 @@ Context:
 Question: {req.query}
 Answer:"""
 
-    # 4. Generate answer
+    # 4. Generate Grounded Answer via gemini-3.6-flash
     client = genai.Client(api_key=x_gemini_key.strip())
     response = client.models.generate_content(
-        model="gemini-2.0-flash", contents=prompt
+        model="gemini-3.6-flash", contents=prompt
     )
 
     return {"answer": response.text, "sources": top_chunks}
+
   except Exception as e:
     raise HTTPException(
         status_code=500, detail=f"Search/Generation failed: {str(e)}"
