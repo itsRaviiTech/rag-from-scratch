@@ -463,7 +463,7 @@
     <!-- Frontend RAG Logic & API Client -->
     <script>
         // Update this URL to your deployed Render/HuggingFace backend, or localhost:8000 for local testing
-        const API_BASE_URL = "http://localhost:8000"; 
+        const API_BASE_URL = "https://rag-from-scratch-iic6.onrender.com"; 
 
         // 1. Fetch GitHub Profile Info Dynamically
         async function loadGithubProfile() {
@@ -483,7 +483,14 @@
         // 2. Upload Document via REST API
         document.getElementById("uploadBtn").addEventListener("click", async () => {
             const fileInput = document.getElementById("fileUploadInput");
+            const keyInput = document.getElementById("geminiKeyInput");
             const statusDiv = document.getElementById("uploadStatus");
+            const apiKey = keyInput.value.trim();
+
+            if (!apiKey) {
+                alert("Please enter your Gemini API Key before uploading.");
+                return;
+            }
 
             if (!fileInput.files[0]) {
                 alert("Please select a .pdf or .txt file first.");
@@ -499,6 +506,9 @@
             try {
                 const res = await fetch(`${API_BASE_URL}/api/upload`, {
                     method: "POST",
+                    headers: {
+                        "X-Gemini-Key": apiKey
+                    },
                     body: formData
                 });
                 const data = await res.json();
