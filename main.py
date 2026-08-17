@@ -158,15 +158,31 @@ Context:
 Question: {req.query}
 Answer:"""
 
-    # 4. Generate Grounded Answer via gemini-3.6-flash
+    # 4. Generate Grounded Answer with Automatic Model Fallback
     client = genai.Client(api_key=x_gemini_key.strip())
-    response = client.models.generate_content(
-        model="gemini-3.6-flash", contents=prompt
-    )
+
+    candidate_generation_models = [
+        "gemini-3.6-flash",
+        "gemini-2.5-flash",
+        "gemini-1.5-flash",
+        "gemini-pro",
+    ]
+
+    response = None
+    last_llm_error = None
+
+    for model_name in candidate_generation_models:
+      try:
+        response = client.models.generate_content(
+            model=model_name, contents=prompt
+        )
+        if response and response.text:
+          break
+      except Exception as e:
+        last_llm_error = str(e)
+        continue
+
+    if not response or not response.text:
+      raise RuntimeError(f"All LLM models busy/unavailable: {last_llm_error}")
 
     return {"answer": response.text, "sources": top_chunks}
-
-  except Exception as e:
-    raise HTTPException(
-        status_code=500, detail=f"Search/Generation failed: {str(e)}"
-    )
