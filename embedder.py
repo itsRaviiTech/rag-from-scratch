@@ -1,51 +1,42 @@
 import numpy as np
-from google import genai
+import requests
 
 
 def generate_embeddings(texts: list[str], api_key: str) -> np.ndarray:
-  """Generates dense embeddings via Google GenAI API with automatic model fallback."""
+  """Generates 768-dimensional dense embeddings using the official Gemini REST endpoint directly.
+
+  This avoids SDK version mismatches and runs with zero local RAM.
+  """
   if not texts:
     return np.array([])
 
-  client = genai.Client(api_key=api_key.strip())
+  key = api_key.strip()
+  url = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:batchEmbedContents?key={key}"
 
-  # Candidate embedding model identifiers supported across Gemini API tiers
-  candidate_models = [
-      "text-embedding-004",
-      "models/text-embedding-004",
-      "embedding-001",
-      "models/embedding-001",
+  # Format batch payload as expected by Google Generative Language API
+  requests_payload = [
+      {
+          "model": "models/text-embedding-004",
+          "content": {"parts": [{"text": t}]},
+      }
+      for t in texts
   ]
 
-  selected_model = None
+  payload = {"requests": requests_payload}
 
-  # Probe for the supported model on the first text
-  for model_name in candidate_models:
-    try:
-      response = client.models.embed_content(
-          model=model_name,
-          contents=texts[0],
-      )
-      selected_model = model_name
-      break
-    except Exception:
-      continue
+  headers = {"Content-Type": "application/json"}
 
-  if not selected_model:
+  response = requests.post(url, json=payload, headers=headers)
+  data = response.json()
+
+  if response.status_code != 200:
+    error_msg = data.get("error", {}).get("message", response.text)
     raise RuntimeError(
-        "Could not find an active embedding model for your Gemini API key."
+        f"Embedding API error ({response.status_code}): {error_msg}"
     )
 
-  vectors = []
-  for text in texts:
-    response = client.models.embed_content(
-        model=selected_model,
-        contents=text,
-    )
+  if "embeddings" not in data:
+    raise RuntimeError(f"Unexpected response format: {data}")
 
-    if hasattr(response, "embedding") and response.embedding:
-      vectors.append(response.embedding.values)
-    elif hasattr(response, "embeddings") and response.embeddings:
-      vectors.append(response.embeddings[0].values)
-
+  vectors = [item["values"] for item in data["embeddings"]]
   return np.array(vectors, dtype=np.float32)
