@@ -158,6 +158,7 @@ Context:
 Question: {req.query}
 Answer:"""
 
+    # 4. Generate Grounded Answer via gemini-3.6-flash
     # 4. Generate Grounded Answer with Automatic Model Fallback
     client = genai.Client(api_key=x_gemini_key.strip())
 
@@ -186,3 +187,8 @@ Answer:"""
       raise RuntimeError(f"All LLM models busy/unavailable: {last_llm_error}")
 
     return {"answer": response.text, "sources": top_chunks}
+
+  except Exception as e:
+    raise HTTPException(
+        status_code=500, detail=f"Search/Generation failed: {str(e)}"
+    )
